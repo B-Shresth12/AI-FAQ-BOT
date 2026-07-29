@@ -1,23 +1,14 @@
-from app.llm.gemini import GeminiService
+from app.chat.conversation_builder import ConversationBuilder
+from app.llm.factory import LLMFactory
 from app.models.message import Message, Role
-from app.prompts.loader import PromptLoader
 
 
 class ChatService:
     def __init__(self):
-        self.llm = GeminiService()
+        self.llm = LLMFactory.create()
+        self.conversation_builder = ConversationBuilder()
 
-    def ask(self, message: list[Message]) -> str:
-        system_prompt = PromptLoader.load("assistant")
+    def ask(self, message: str) -> str:
+        messages = self.conversation_builder.build(message)
 
-        messages = [
-            Message(
-                role=Role.SYSTEM,
-                content=system_prompt,
-            ),
-            Message(
-                role=Role.USER,
-                content=message,
-            ),
-        ]
         return self.llm.chat(message=messages)

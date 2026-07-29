@@ -11,8 +11,11 @@ class GeminiService(LLM):
 
     # GEMINI Commuinicator
     def chat(self, message: list[Message]) -> str:
+        contents = self.aggMessage(message=message)
+
         response = self.client.models.generate_content(
-            model="gemini-3.5-flash", contents=message[0].content
+            model=settings.MODEL_NAME,
+            contents=contents,
         )
 
         return response.text

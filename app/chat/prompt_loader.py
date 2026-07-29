@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 class PromptLoader:
+    # pointing to template directory
     BASE_PATH = Path(__file__).parent / "templates"
 
     @classmethod

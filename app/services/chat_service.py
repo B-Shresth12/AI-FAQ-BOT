@@ -9,6 +9,10 @@ class ChatService:
         self.conversation_builder = ConversationBuilder()
 
     def ask(self, message: str) -> str:
-        messages = self.conversation_builder.build(message)
+        conversation = self.conversation_builder.build(message)
 
-        return self.llm.chat(messages=messages)
+        answer = self.llm.chat(conversation=conversation)
+
+        conversation.add_assistant(answer)
+
+        return answer

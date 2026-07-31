@@ -2,7 +2,7 @@ from google import genai
 
 from app.config.settings import settings
 from app.llm.base import LLM
-from app.models.message import Message
+from app.models.conversation import Conversation
 
 
 class GeminiService(LLM):
@@ -10,8 +10,10 @@ class GeminiService(LLM):
         self.client = genai.Client(api_key=settings.GEMINII_API_KEY)
 
     # GEMINI Commuinicator
-    def chat(self, messages: list[Message]) -> str:
-        contents = "\n\n".join(f"{msg.role.value}: {msg.content}" for msg in messages)
+    def chat(self, conversation: Conversation) -> str:
+        contents = "\n\n".join(
+            f"{msg.role.value}: {msg.content}" for msg in conversation.messages
+        )
 
         response = self.client.models.generate_content(
             model=settings.GEMINI_MODEL,

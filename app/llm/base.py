@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from app.models.message import Message
+from app.models.conversation import Conversation
 
 
 class LLM(ABC):
     @abstractmethod
-    def chat(self, messages: list[Message]) -> str:
+    def chat(self, conversation: Conversation) -> str:
         pass

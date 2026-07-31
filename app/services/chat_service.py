@@ -11,4 +11,4 @@ class ChatService:
     def ask(self, message: str) -> str:
         messages = self.conversation_builder.build(message)
 
-        return self.llm.chat(message=messages)
+        return self.llm.chat(messages=messages)

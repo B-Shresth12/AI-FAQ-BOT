@@ -11,7 +11,8 @@ class Settings:
 
     # MODEL INITIALIZATION
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER")
-    MODEL_NAME: str = os.getenv("MODEL_NAME")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL")
 
     # INITIALIZING GEMIN API KEY
     GEMINII_API_KEY: str = os.getenv("GEMINI_API_KEY")

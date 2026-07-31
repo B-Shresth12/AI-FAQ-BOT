@@ -2,11 +2,23 @@ import ollama
 
 from app.config.settings import settings
 from app.llm.base import LLM
+from app.models.message import Message
 
 
 class OllamaService(LLM):
-    def chat(self, message) -> str:
-        contents = self.aggMessage(message=message)
+    def _build_messages(self, messages: list[Message]):
+        return [
+            {
+                "role": message.role.value,
+                "content": message.content,
+            }
+            for message in messages
+        ]
 
-        result = ollama.generate(model=settings.MODEL_NAME, prompt=contents)
-        return result["response"]
+    # Ollama Commuinicator
+    def chat(self, messages) -> str:
+
+        result = ollama.chat(
+            model=settings.OLLAMA_MODEL, messages=self._build_messages(messages)
+        )
+        return result["message"].content

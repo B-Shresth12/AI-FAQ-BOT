@@ -10,11 +10,11 @@ class GeminiService(LLM):
         self.client = genai.Client(api_key=settings.GEMINII_API_KEY)
 
     # GEMINI Commuinicator
-    def chat(self, message: list[Message]) -> str:
-        contents = self.aggMessage(message=message)
+    def chat(self, messages: list[Message]) -> str:
+        contents = "\n\n".join(f"{msg.role.value}: {msg.content}" for msg in messages)
 
         response = self.client.models.generate_content(
-            model=settings.MODEL_NAME,
+            model=settings.GEMINI_MODEL,
             contents=contents,
         )
 

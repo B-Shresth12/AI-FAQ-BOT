@@ -17,6 +17,9 @@ class Settings:
     # INITIALIZING GEMIN API KEY
     GEMINII_API_KEY: str = os.getenv("GEMINI_API_KEY")
 
+    # Max Content Token
+    MAX_CONTEXT_TOKENS: int = int(os.getenv("MAX_CONTEXT_TOKENS"))
+
 
 # Creating an instance of Settings
 settings = Settings()

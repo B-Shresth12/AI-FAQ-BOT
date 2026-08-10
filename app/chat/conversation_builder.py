@@ -12,6 +12,5 @@ class ConversationBuilder:
         conversation = Conversation()
 
         conversation.add_system(system_prompt)
-        # conversation.add_user(user_message)
-        
+
         return conversation

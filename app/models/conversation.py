@@ -20,3 +20,10 @@ class Conversation:
 
     def add_message(self, message: Message):
         self._messages.append(message)
+
+    def remove_message(self, index: int):
+        del self._messages[index]
+
+    # Basically merging array - array_merge() in php
+    def add_messages(self, messages: list[Message]):
+        self._messages.extend(messages)

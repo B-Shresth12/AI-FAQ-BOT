@@ -1,11 +1,12 @@
 from transformers import AutoTokenizer
 
+from app.config.settings import Settings
 from app.models.conversation import Conversation
 
 
 class TokenCounter:
-    def __init__(self, model_name: str):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+    def __init__(self):
+        self.tokenizer = AutoTokenizer.from_pretrained(Settings.TOKENIZER_MODEL)
 
     def count(self, conversation: Conversation) -> int:
         text = "\n\n".join(

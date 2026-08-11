@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.chat.context_manager import ContextManager
 from app.chat.conversation_builder import ConversationBuilder
 from app.chat.conversation_store import ConversationStore
 from app.llm.factory import LLMFactory
@@ -11,6 +12,7 @@ router = APIRouter()
 chat_service = ChatService(
     conversation_builder=ConversationBuilder(),
     conversation_store=ConversationStore(),
+    context_manager=ContextManager(),
     llm=LLMFactory.create(),
 )
 
@@ -22,12 +24,3 @@ def chat(request: ChatRequest):
     )
 
     return ChatResponse(answer=answer)
-
-
-# chamal
-# rato tika
-# pahilo tika
-# chiura
-# sano kerau
-# jerry - X
-# chanchun paisa

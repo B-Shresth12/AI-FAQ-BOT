@@ -8,6 +8,8 @@ conversation = builder.build()
 conversation.add_user("My name is Bishal Shrestha.")
 conversation.add_assistant("Nice to meet you, Bishal.")
 conversation.add_user("what is my name?")
+conversation.add_assistant("Your name is Bishal Shrestha.")
+conversation.add_user("TESTING this comment")
 
 context_manager = ContextManager()
 counter = TokenCounter()

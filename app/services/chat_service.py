@@ -24,9 +24,10 @@ class ChatService:
             conversation = self.conversation_builder.build()
 
         conversation.add_user(message)
-        self.context_manager.build(conversation=conversation)
 
-        answer = self.llm.chat(conversation=conversation)
+        context = self.context_manager.build(conversation=conversation)
+
+        answer = self.llm.chat(conversation=context)
 
         conversation.add_assistant(answer)
 

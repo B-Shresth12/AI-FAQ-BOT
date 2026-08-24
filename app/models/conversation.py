@@ -27,3 +27,10 @@ class Conversation:
     # Basically merging array - array_merge() in php
     def add_messages(self, messages: list[Message]):
         self._messages.extend(messages)
+
+    # Adding Context
+    def add_context(self, content: str):
+        self._messages.append(Message(role=Role.CONTEXT, content=content))
+
+    def add_context_at(self, index: int, content: str):
+        self._messages.insert(index, Message(role=Role.CONTEXT, content=content))

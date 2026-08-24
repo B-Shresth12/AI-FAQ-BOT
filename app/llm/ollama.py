@@ -18,7 +18,6 @@ class OllamaService(LLM):
     # Ollama Commuinicator
     def chat(self, conversation) -> str:
 
-        result = ollama.chat(
-            model=settings.OLLAMA_MODEL, messages=self._build_messages(conversation)
-        )
+        messages = self._build_messages(conversation)
+        result = ollama.chat(model=settings.OLLAMA_MODEL, messages=messages)
         return result["message"].content

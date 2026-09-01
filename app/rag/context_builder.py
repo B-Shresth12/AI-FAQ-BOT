@@ -4,6 +4,7 @@ from app.models.document_chunk import DocumentChunk
 
 class RAGContextBuilder:
     def build(
+        self,
         conversation: Conversation,
         chunks: list[DocumentChunk],
     ) -> Conversation:

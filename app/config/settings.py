@@ -28,6 +28,14 @@ class Settings:
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE"))
     CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP"))
 
+    RAG_SIMILARITY_THRESHOLD: float = float(
+        os.getenv("RAG_SIMILARITY_THRESHOLD", "0.5")
+    )
+
+    # Chroma Config
+    CHROMA_PERSIST_DIRECTORY: str = str(os.getenv("CHROMA_PERSIST_DIRECTORY"))
+    CHROMA_COLLECTION_NAME: str = str(os.getenv("CHROMA_COLLECTION_NAME"))
+
 
 # Creating an instance of Settings
 settings = Settings()

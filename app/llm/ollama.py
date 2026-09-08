@@ -3,13 +3,16 @@ import ollama
 from app.config.settings import settings
 from app.llm.base import LLM
 from app.models.conversation import Conversation
+from app.models.message import Role
 
 
 class OllamaService(LLM):
     def _build_messages(self, conversation: Conversation):
         return [
             {
-                "role": message.role.value,
+                "role": "system"
+                if message.role.value == Role.CONTEXT
+                else message.role.value,
                 "content": message.content,
             }
             for message in conversation.messages

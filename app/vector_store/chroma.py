@@ -10,7 +10,7 @@ class ChromaVectorStore(VectorStore):
         self.client = chromadb.PersistentClient(path=settings.CHROMA_PERSIST_DIRECTORY)
 
         self.collection = self.client.get_or_create_collection(
-            name=settings.CHROMA_COLLECTION_NAME
+            name=settings.CHROMA_COLLECTION_NAME, metadata={"hnsw:space": "cosine"}
         )
 
     def add(
@@ -29,20 +29,43 @@ class ChromaVectorStore(VectorStore):
             ],
         )
 
-    def search(self, embedding: list[float], limit: int = 5) -> list[DocumentChunk]:
-        results = self.collection.query(query_embeddings=[embedding], n_results=limit)
+    def search(
+        self,
+        embedding: list[float],
+        limit: int = 5,
+    ) -> list[DocumentChunk]:
+
+        results = self.collection.query(
+            query_embeddings=[embedding],
+            n_results=limit,
+            include=["documents", "metadatas", "distances"],
+        )
+
+        print("Distances:", results["distances"])
 
         chunks = []
 
         ids = results["ids"][0]
         documents = results["documents"][0]
         metadatas = results["metadatas"][0]
+        distances = results["distances"][0]
 
-        for id, content, metadata in zip(ids, documents, metadatas):
+        max_distance = 1 - settings.RAG_SIMILARITY_THRESHOLD
+
+        for id, content, metadata, distance in zip(
+            ids,
+            documents,
+            metadatas,
+            distances,
+        ):
+            print("Distance::", distance)
+            if distance > max_distance:
+                continue
+
             chunks.append(
                 DocumentChunk(
                     id=id,
-                    document_id=metadata["docuemnt_id"],
+                    document_id=metadata["document_id"],
                     content=content,
                 )
             )

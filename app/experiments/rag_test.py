@@ -3,10 +3,10 @@ from app.models.document import Document
 from app.rag.chunker import DocumentChunker
 from app.rag.indexer import KnowledgeIndexer
 from app.rag.retriever import Retriever
-from app.vector_store.memory import MemoryVectorStore
+from app.vector_store.chroma import ChromaVectorStore
 
 embedding = OllamaEmbedding()
-vector_store = MemoryVectorStore()
+vector_store = ChromaVectorStore()
 chunker = DocumentChunker()
 
 indexer = KnowledgeIndexer(

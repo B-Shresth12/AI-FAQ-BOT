@@ -2,3 +2,5 @@
 !.gitignore
 !.env.example
 __pycache__/
+
+storage/*

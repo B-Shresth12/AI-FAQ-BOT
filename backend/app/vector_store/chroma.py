@@ -41,8 +41,6 @@ class ChromaVectorStore(VectorStore):
             include=["documents", "metadatas", "distances"],
         )
 
-        print("Distances:", results["distances"])
-
         chunks = []
 
         ids = results["ids"][0]
@@ -58,7 +56,6 @@ class ChromaVectorStore(VectorStore):
             metadatas,
             distances,
         ):
-            print("Distance::", distance)
             if distance > max_distance:
                 continue
 

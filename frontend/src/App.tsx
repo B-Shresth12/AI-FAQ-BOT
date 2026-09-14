@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import "./App.css";
+import { chat } from "./Actions";
 
 type Role = "user" | "assistant";
 interface Message {
@@ -33,36 +36,51 @@ const FAQ: { question: string; answer: string }[] = [
 
 let nextId = 1;
 
+const getConversationId = () => {
+  // const existing = sessionStorage.getItem("conversation_id");
+  // if (existing) return existing;
+  // const id = crypto.randomUUID();
+  // sessionStorage.setItem("conversation_id", id);
+  // return id;
+  return "faq-001";
+};
+
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const conversationIdRef = useRef<string>(getConversationId());
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
 
-  const respond = (question: string) => {
+  const respond = async (question: string) => {
     const userMsg: Message = { id: nextId++, role: "user", text: question };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsThinking(true);
 
-    const match = FAQ.find((f) =>
-      f.question.toLowerCase().includes(question.toLowerCase().slice(0, 8)),
-    );
-    const answer =
-      match?.answer ??
-      "I don't have an exact answer for that yet, but try one of the suggested questions below.";
-
-    window.setTimeout(() => {
-      setIsThinking(false);
+    try {
+      const { answer } = await chat(conversationIdRef.current, question);
       setMessages((prev) => [
         ...prev,
         { id: nextId++, role: "assistant", text: answer },
       ]);
-    }, 700);
+    } catch (err) {
+      console.error("chat request failed", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId++,
+          role: "assistant",
+          text: "Something went wrong reaching the assistant. Please try again.",
+        },
+      ]);
+    } finally {
+      setIsThinking(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,61 +90,102 @@ function App() {
   };
 
   return (
-    <div className="chat-shell">
-      <header className="chat-header">
-        <span className="chat-header-dot" />
-        <h1>AI FAQ</h1>
-      </header>
+    <div className="page">
+      <aside className="side-panel">
+        <div className="side-content">
+          <div className="side-brand">
+            <span className="chat-header-dot" />
+            <span className="side-brand-label">AI FAQ</span>
+          </div>
 
-      <div className="chat-body">
-        {messages.length === 0 && (
-          <div className="chat-empty">
-            <h2>Ask me anything about the product</h2>
-            <p>Or pick a common question to get started</p>
-            <div className="chip-row">
-              {FAQ.map((f) => (
-                <button
-                  key={f.question}
-                  className="chip"
-                  onClick={() => respond(f.question)}
-                >
-                  {f.question}
-                </button>
-              ))}
+          <h1 className="side-title">
+            Ask anything.
+            <br />
+            Get answers instantly.
+          </h1>
+          <p className="side-desc">
+            This assistant is trained on our product docs so you can get
+            straight answers without digging through help pages.
+          </p>
+
+          <ul className="side-features">
+            <li>
+              <span className="feature-dot" />
+              Answers grounded in official documentation
+            </li>
+            <li>
+              <span className="feature-dot" />
+              Nothing you type here is used for training
+            </li>
+            <li>
+              <span className="feature-dot" />
+              Hand off to a human whenever you need to
+            </li>
+          </ul>
+        </div>
+
+        <p className="side-footer">Available Monday–Friday, business hours</p>
+      </aside>
+
+      <main className="chat-shell">
+        <div className="chat-body">
+          {messages.length === 0 && (
+            <div className="chat-empty">
+              <h2>Ask me anything about the product</h2>
+              <p>Or pick a common question to get started</p>
+              <div className="chip-row">
+                {FAQ.map((f) => (
+                  <button
+                    key={f.question}
+                    className="chip"
+                    onClick={() => respond(f.question)}
+                  >
+                    {f.question}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {messages.map((m) => (
-          <div key={m.id} className={`bubble-row ${m.role}`}>
-            <div className={`bubble ${m.role}`}>{m.text}</div>
-          </div>
-        ))}
-
-        {isThinking && (
-          <div className="bubble-row assistant">
-            <div className="bubble assistant thinking">
-              <span className="dot" />
-              <span className="dot" />
-              <span className="dot" />
+          {messages.map((m) => (
+            <div key={m.id} className={`bubble-row ${m.role}`}>
+              <div className={`bubble ${m.role}`}>
+                {m.role === "assistant" ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {m.text}
+                  </ReactMarkdown>
+                ) : (
+                  m.text
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          ))}
 
-        <div ref={endRef} />
-      </div>
+          {isThinking && (
+            <div className="bubble-row assistant">
+              <div className="bubble assistant thinking">
+                <span className="dot" />
+                <span className="dot" />
+                <span className="dot" />
+              </div>
+            </div>
+          )}
 
-      <form className="chat-input-bar" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question..."
-        />
-        <button type="submit" disabled={!input.trim() || isThinking}>
-          ↑
-        </button>
-      </form>
+          <div ref={endRef} />
+        </div>
+
+        <form className="chat-input-bar" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask a question..."
+          />
+          <button type="submit" disabled={!input.trim() || isThinking}>
+            ↑
+          </button>
+        </form>
+      </main>
     </div>
   );
 }

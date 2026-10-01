@@ -1,6 +1,5 @@
 from app.chat.context_manager import ContextManager
 from app.chat.conversation_builder import ConversationBuilder
-from app.chat.conversation_store import ConversationStore
 from app.embeddings.ollama import OllamaEmbedding
 from app.llm.factory import LLMFactory
 from app.rag.chunker import DocumentChunker
@@ -9,6 +8,7 @@ from app.rag.indexer import KnowledgeIndexer
 from app.rag.initializer import KnowledgeInitializer
 from app.rag.knowledge_loader import KnowlegeLoader
 from app.rag.retriever import Retriever
+from app.repositories.postgres_conversation_store import PostgresConversationStore
 from app.services.chat_service import ChatService
 from app.vector_store.chroma import ChromaVectorStore
 
@@ -41,7 +41,7 @@ class Container:
 
         # Conversation
         self.conversation_builder = ConversationBuilder()
-        self.conversation_store = ConversationStore()
+        self.conversation_store = PostgresConversationStore()
         self.context_manager = ContextManager()
 
         self.llm = LLMFactory.create()

@@ -2,7 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "./App.css";
-import { chat } from "./Actions";
+import {
+  chat,
+  getMessagesofConversation,
+  getConversations,
+  type ConversationSummary,
+} from "./Actions";
+import Sidebar from "./Sidebar";
 
 type Role = "user" | "assistant";
 interface Message {
@@ -11,50 +17,88 @@ interface Message {
   text: string;
 }
 
-const FAQ: { question: string; answer: string }[] = [
-  {
-    question: "What is this AI assistant?",
-    answer:
-      "It's a tool that answers common questions instantly, trained on our product docs so you don't have to dig through help pages.",
-  },
-  {
-    question: "Is my data used to train the model?",
-    answer:
-      "No. Conversations here are used only to answer your question in this session — nothing is stored for training.",
-  },
-  {
-    question: "Can I talk to a human instead?",
-    answer:
-      "Yes — type 'talk to support' any time and we'll connect you with our team during business hours.",
-  },
-  {
-    question: "How accurate are the answers?",
-    answer:
-      "Answers are drawn from our official docs and reviewed regularly, but always double-check anything critical against the source page.",
-  },
+const FAQ: { question: string }[] = [
+  { question: "What is this AI assistant?" },
+  { question: "Is my data used to train the model?" },
+  { question: "Can I talk to a human instead?" },
+  { question: "How accurate are the answers?" },
 ];
 
 let nextId = 1;
 
 const getConversationId = () => {
-  // const existing = sessionStorage.getItem("conversation_id");
-  // if (existing) return existing;
-  // const id = crypto.randomUUID();
-  // sessionStorage.setItem("conversation_id", id);
-  // return id;
   return "faq-001";
+};
+
+const generateNewConversationId = () => {
+  return crypto.randomUUID();
 };
 
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [activeConversationId, setActiveConversationId] =
+    useState<string>(getConversationId());
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
-  const conversationIdRef = useRef<string>(getConversationId());
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
+
+  // Load the list of conversations once on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadConversations = async () => {
+      try {
+        const { conversations } = await getConversations();
+        if (cancelled) return;
+        setConversations(conversations);
+      } catch (err) {
+        console.error("failed to load conversations", err);
+      }
+    };
+
+    loadConversations();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Load messages whenever the active conversation changes
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadHistory = async () => {
+      try {
+        const conversation =
+          await getMessagesofConversation(activeConversationId);
+        if (cancelled) return;
+
+        const history: Message[] = conversation.messages
+          .filter((m) => m.role === "user" || m.role === "assistant")
+          .map((m) => ({
+            id: nextId++,
+            role: m.role as Role,
+            text: m.content,
+          }));
+
+        setMessages(history);
+      } catch (err) {
+        console.error("failed to load conversation history", err);
+      }
+    };
+
+    loadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeConversationId]);
 
   const respond = async (question: string) => {
     const userMsg: Message = { id: nextId++, role: "user", text: question };
@@ -63,7 +107,7 @@ function App() {
     setIsThinking(true);
 
     try {
-      const { answer } = await chat(conversationIdRef.current, question);
+      const { answer } = await chat(activeConversationId, question);
       setMessages((prev) => [
         ...prev,
         { id: nextId++, role: "assistant", text: answer },
@@ -89,43 +133,22 @@ function App() {
     respond(input.trim());
   };
 
+  const handleNewChat = () => {
+    setActiveConversationId(generateNewConversationId());
+    setMessages([]);
+    setInput("");
+  };
+
   return (
     <div className="page">
-      <aside className="side-panel">
-        <div className="side-content">
-          <div className="side-brand">
-            <span className="chat-header-dot" />
-            <span className="side-brand-label">AI FAQ</span>
-          </div>
-
-          <h1 className="side-title">
-            Ask anything.
-            <br />
-            Get answers instantly.
-          </h1>
-          <p className="side-desc">
-            This assistant is trained on our product docs so you can get
-            straight answers without digging through help pages.
-          </p>
-
-          <ul className="side-features">
-            <li>
-              <span className="feature-dot" />
-              Answers grounded in official documentation
-            </li>
-            <li>
-              <span className="feature-dot" />
-              Nothing you type here is used for training
-            </li>
-            <li>
-              <span className="feature-dot" />
-              Hand off to a human whenever you need to
-            </li>
-          </ul>
-        </div>
-
-        <p className="side-footer">Available Monday–Friday, business hours</p>
-      </aside>
+      <Sidebar
+        conversations={conversations}
+        activeConversationId={activeConversationId}
+        onSelectConversation={setActiveConversationId}
+        onNewChat={handleNewChat}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={() => setSidebarCollapsed((prev) => !prev)}
+      />
 
       <main className="chat-shell">
         <div className="chat-body">

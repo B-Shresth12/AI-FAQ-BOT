@@ -36,6 +36,9 @@ class Settings:
     CHROMA_PERSIST_DIRECTORY: str = str(os.getenv("CHROMA_PERSIST_DIRECTORY"))
     CHROMA_COLLECTION_NAME: str = str(os.getenv("CHROMA_COLLECTION_NAME"))
 
+    # Database
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
+
 
 # Creating an instance of Settings
 settings = Settings()

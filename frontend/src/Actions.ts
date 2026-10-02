@@ -1,5 +1,5 @@
 "use client";
-const host: string = "http://192.168.1.161:8000";
+const host = import.meta.env.VITE_API_URL;
 
 interface Answer {
   answer: string;

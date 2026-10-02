@@ -1,5 +1,4 @@
 import ollama
-
 from app.config.settings import settings
 from app.embeddings.base import Embedding
 

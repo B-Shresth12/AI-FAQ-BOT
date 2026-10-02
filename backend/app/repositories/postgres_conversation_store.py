@@ -66,7 +66,9 @@ class PostgresConversationStore(ConversationStore):
         with SessionLocal() as db:
             conversations = (
                 db.execute(
-                    select(ConversationModel).order_by(ConversationModel.updated_at.desc())
+                    select(ConversationModel).order_by(
+                        ConversationModel.updated_at.desc()
+                    )
                 )
                 .scalars()
                 .all()
